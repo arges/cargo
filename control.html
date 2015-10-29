@@ -1,0 +1,88 @@
+<html>
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no" />
+
+<head>
+    <title></title>
+</head>
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        -webkit-user-select: none;
+        -moz-user-select: -moz-none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    table {
+        display: table;
+        width: 100%;
+        height: 50%;
+    }
+    
+    button {
+        width: 100%;
+        height: 100%;
+        font-size: 10em;
+    }
+</style>
+<script>
+    var serversocket = new WebSocket("ws://192.168.1.120:9090/control");
+    serversocket.onopen = function() {
+        serversocket.send("init");
+    }
+
+    document.addEventListener('mousedown', function(e) {
+        if (e.target.value != undefined) {
+            send(e.target.value);
+        }
+    });
+    document.addEventListener('mouseup', function(e) {
+        send('stop');
+    });
+
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.value != undefined) {
+            send(e.target.value);
+        }
+    });
+    document.addEventListener('touchend', function(e) {
+        send('stop');
+    });
+
+    function send(text) {
+        serversocket.send(text);
+        console.log(text);
+    }
+</script>
+
+<body>
+    <img src="http://192.168.1.120:8081/" width="320" height="240" />
+    <table>
+        <tr>
+            <td>
+                <!--<button value="beep">♩</button>-->
+            </td>
+            <td>
+                <button value="forward">↑</button>
+            </td>
+            <td>
+                <button value="stop">☒</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button value="left">←</button>
+            </td>
+            <td>
+                <button value="reverse">↓</button>
+            </td>
+            <td>
+                <button value="right">→</button>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
