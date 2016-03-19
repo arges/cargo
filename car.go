@@ -61,9 +61,9 @@ var in3 hwio.Pin
 var in4 hwio.Pin
 
 func setupControls() {
-	in1, _ = hwio.GetPin("gpio4")
+	in1, _ = hwio.GetPin("gpio24")
 	in2, _ = hwio.GetPin("gpio17")
-	in3, _ = hwio.GetPin("gpio18")
+	in3, _ = hwio.GetPin("gpio23")
 	in4, _ = hwio.GetPin("gpio22")
 	_ = hwio.PinMode(in1, hwio.OUTPUT)
 	_ = hwio.PinMode(in2, hwio.OUTPUT)
@@ -96,7 +96,7 @@ func socketHandler(ws *websocket.Conn) {
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "control.html")
+	http.ServeFile(w, r, "/home/pi/control.html")
 }
 
 func setupWebserver() {
