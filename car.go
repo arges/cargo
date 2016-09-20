@@ -5,70 +5,56 @@ import (
 	"github.com/mrmorphic/hwio"
 	"golang.org/x/net/websocket"
 	"net/http"
-	"os"
 )
 
-func check(err error) {
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+const (
+	in1 = iota
+	in2
+	in3
+	in4
+	TotalPins
+)
+
+type Car struct {
+	pins [TotalPins]hwio.Pin
 }
 
-func forward() {
-	fmt.Println("forward")
-	hwio.DigitalWrite(in1, hwio.HIGH)
-	hwio.DigitalWrite(in2, hwio.LOW)
-	hwio.DigitalWrite(in3, hwio.LOW)
-	hwio.DigitalWrite(in4, hwio.HIGH)
+func (c *Car) Motor(v1, v2, v3, v4 int) {
+	hwio.DigitalWrite(c.pins[in1], v1)
+	hwio.DigitalWrite(c.pins[in2], v2)
+	hwio.DigitalWrite(c.pins[in3], v3)
+	hwio.DigitalWrite(c.pins[in4], v4)
 }
 
-func reverse() {
-	fmt.Println("reverse")
-	hwio.DigitalWrite(in1, hwio.LOW)
-	hwio.DigitalWrite(in2, hwio.HIGH)
-	hwio.DigitalWrite(in3, hwio.HIGH)
-	hwio.DigitalWrite(in4, hwio.LOW)
+func (c *Car) Forward() {
+	c.Motor(hwio.HIGH, hwio.LOW, hwio.LOW, hwio.HIGH)
 }
 
-func left() {
-	fmt.Println("left")
-	hwio.DigitalWrite(in1, hwio.LOW)
-	hwio.DigitalWrite(in2, hwio.HIGH)
-	hwio.DigitalWrite(in3, hwio.LOW)
-	hwio.DigitalWrite(in4, hwio.HIGH)
+func (c *Car) Reverse() {
+	c.Motor(hwio.LOW, hwio.HIGH, hwio.HIGH, hwio.LOW)
 }
 
-func right() {
-	fmt.Println("right")
-	hwio.DigitalWrite(in1, hwio.HIGH)
-	hwio.DigitalWrite(in2, hwio.LOW)
-	hwio.DigitalWrite(in3, hwio.HIGH)
-	hwio.DigitalWrite(in4, hwio.LOW)
+func (c *Car) Left() {
+	c.Motor(hwio.LOW, hwio.HIGH, hwio.LOW, hwio.HIGH)
 }
 
-func stop() {
-	fmt.Println("stop")
-	hwio.DigitalWrite(in1, hwio.LOW)
-	hwio.DigitalWrite(in2, hwio.LOW)
-	hwio.DigitalWrite(in3, hwio.LOW)
-	hwio.DigitalWrite(in4, hwio.LOW)
+func (c *Car) Right() {
+	c.Motor(hwio.HIGH, hwio.LOW, hwio.HIGH, hwio.LOW)
 }
 
-var in1 hwio.Pin
-var in2 hwio.Pin
-var in3 hwio.Pin
-var in4 hwio.Pin
+func (c *Car) Stop() {
+	c.Motor(hwio.LOW, hwio.LOW, hwio.LOW, hwio.LOW)
+}
 
-func setupControls() {
-	in1, _ = hwio.GetPin("gpio24")
-	in2, _ = hwio.GetPin("gpio17")
-	in3, _ = hwio.GetPin("gpio23")
-	in4, _ = hwio.GetPin("gpio22")
-	_ = hwio.PinMode(in1, hwio.OUTPUT)
-	_ = hwio.PinMode(in2, hwio.OUTPUT)
-	_ = hwio.PinMode(in3, hwio.OUTPUT)
-	_ = hwio.PinMode(in4, hwio.OUTPUT)
+func (c *Car) Setup() {
+	c.pins[in1], _ = hwio.GetPin("gpio24")
+	c.pins[in2], _ = hwio.GetPin("gpio17")
+	c.pins[in3], _ = hwio.GetPin("gpio23")
+	c.pins[in4], _ = hwio.GetPin("gpio22")
+	_ = hwio.PinMode(c.pins[in1], hwio.OUTPUT)
+	_ = hwio.PinMode(c.pins[in2], hwio.OUTPUT)
+	_ = hwio.PinMode(c.pins[in3], hwio.OUTPUT)
+	_ = hwio.PinMode(c.pins[in4], hwio.OUTPUT)
 }
 
 func socketHandler(ws *websocket.Conn) {
@@ -80,23 +66,23 @@ func socketHandler(ws *websocket.Conn) {
 
 		switch s {
 		case "forward":
-			forward()
+			c.Forward()
 		case "reverse":
-			reverse()
+			c.Reverse()
 		case "left":
-			left()
+			c.Left()
 		case "right":
-			right()
+			c.Right()
 		case "stop":
-			stop()
+			c.Stop()
 		default:
-			stop()
+			c.Stop()
 		}
 	}
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "/home/pi/control.html")
+	http.ServeFile(w, r, "./control.html")
 }
 
 func setupWebserver() {
@@ -105,8 +91,11 @@ func setupWebserver() {
 	http.ListenAndServe(":9090", nil)
 }
 
+var c Car
+
 func main() {
-	setupControls()
+	c.Setup()
+
 	setupWebserver()
 	for {
 	}
