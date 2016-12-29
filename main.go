@@ -13,8 +13,10 @@ type Cargo struct {
 }
 
 const (
-	motorL = 0
-	motorR = 1
+	motorL        = 0
+	motorR        = 1
+	outputConfig0 = 2
+	output0       = 8
 )
 
 func NewCargo() (c Cargo) {
@@ -25,12 +27,23 @@ func NewCargo() (c Cargo) {
 		panic(err)
 	}
 	c.Move(0, 0)
+
+	// Setup servo on output 0
+	c.setOutput(outputConfig0, 2)
 	return
 }
 
+func (c *Cargo) setOutput(output, value byte) {
+	c.dev.Write([]byte{output, value})
+}
+
 func (c *Cargo) Move(speedL, speedR int8) {
-	c.dev.Write([]byte{motorL, byte(speedL)})
-	c.dev.Write([]byte{motorR, byte(speedR)})
+	c.setOutput(motorL, byte(speedL))
+	c.setOutput(motorR, byte(speedR))
+}
+
+func (c *Cargo) SetServo(pos int8) {
+	c.setOutput(output0, byte(pos))
 }
 
 func (c *Cargo) SocketHandler(ws *websocket.Conn) {
@@ -43,14 +56,19 @@ func (c *Cargo) SocketHandler(ws *websocket.Conn) {
 		switch s {
 		case "forward":
 			c.Move(127, 127)
+			c.SetServo(90)
 		case "reverse":
 			c.Move(-127, -127)
+			c.SetServo(-90)
 		case "left":
 			c.Move(127, -127)
+			c.SetServo(-45)
 		case "right":
 			c.Move(-127, 127)
+			c.SetServo(45)
 		case "stop":
 			c.Move(0, 0)
+			c.SetServo(0)
 		default:
 			c.Move(0, 0)
 		}
