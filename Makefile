@@ -1,5 +1,5 @@
 all:
-	go build car.go
+	GOARCH=arm go build
 
 clean:
-	rm car
+	rm cargo
