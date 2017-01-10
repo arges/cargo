@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os/exec"
+	"strconv"
+	"strings"
 
 	"golang.org/x/exp/io/i2c"
 	"golang.org/x/net/websocket"
@@ -44,6 +47,14 @@ func (c *Cargo) Move(speedL, speedR int8) {
 
 func (c *Cargo) SetServo(pos int8) {
 	c.setOutput(output0, byte(pos))
+}
+
+func (c *Cargo) GetDistance() int64 {
+	out, _ := exec.Command("python", "./sonar.py").Output()
+	s := strings.TrimSpace(string(out))
+	fmt.Println(s)
+	distance, _ := strconv.ParseInt(s, 10, 32)
+	return distance
 }
 
 func (c *Cargo) SocketHandler(ws *websocket.Conn) {
