@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/exp/io/i2c"
 	"golang.org/x/net/websocket"
@@ -55,6 +56,33 @@ func (c *Cargo) GetDistance() int64 {
 	fmt.Println(s)
 	distance, _ := strconv.ParseInt(s, 10, 32)
 	return distance
+}
+
+func (c *Cargo) ExecuteProgram(program string) {
+	for _, s := range strings.Split(strings.Replace(program, ";", "\n", -1), "\n") {
+		line := strings.TrimSpace(s)
+		splits := strings.Split(line, " ")
+
+		switch splits[0] {
+		case "forward":
+			c.Move(127, 127)
+		case "reverse":
+			c.Move(-127, -127)
+		case "left":
+			c.Move(127, -127)
+		case "right":
+			c.Move(-127, 127)
+		case "stop":
+			c.Move(0, 0)
+		default:
+			c.Move(0, 0)
+		}
+
+		d, _ := strconv.ParseInt(splits[1], 10, 32)
+
+		time.Sleep(time.Duration(d) * 10 * time.Millisecond)
+		c.Move(0, 0)
+	}
 }
 
 func (c *Cargo) SocketHandler(ws *websocket.Conn) {
