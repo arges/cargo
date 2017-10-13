@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=0.75, user-scalable=no" />
+
+<head>
+    <title>Math Game</title>
+</head>
+<style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        -webkit-user-select: none;
+        -moz-user-select: -moz-none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    table {
+        display: table;
+        width: 100%;
+        height: 50%;
+        font-size: 7em;
+    }
+    input {
+        font-size: 1em;
+        width: 100%;
+        height: 100%;
+    }
+
+</style>
+<body>
+Correct: {{ .Correct }}<p \>
+Incorrect: {{ .Incorrect }}
+<table>
+	<tbody>
+		<tr>
+			<td></td>
+			<td>{{ .Current.Operand1 }}</td>
+		</tr>
+		<tr>
+			<td>{{ .Current.Operator }}</td>
+			<td>{{ .Current.Operand2 }}</td>
+		</tr>
+		<tr>
+			<td>=</td>
+			<td> <form method="post"><input type="number" name="Result" value="" autofocus></form></td>
+		</tr>
+	</tbody>
+</table>
+
+</body>
+
+</html>

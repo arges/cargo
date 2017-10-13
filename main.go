@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os/exec"
 	"strconv"
@@ -90,7 +91,7 @@ func (c *Cargo) SocketHandler(ws *websocket.Conn) {
 		receivedtext := make([]byte, 16)
 		n, _ := ws.Read(receivedtext)
 		s := string(receivedtext[:n])
-		fmt.Printf("Received: %s\n", s)
+		//fmt.Printf("Received: %s\n", s)
 
 		switch s {
 		case "forward":
@@ -121,12 +122,16 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 func (c *Cargo) SetupWebserver() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", webHandler)
+	mux.Handle("/math", &Context{Car: c})
 	mux.Handle("/control", websocket.Handler(c.SocketHandler))
 	http.ListenAndServe(":9090", mux)
 }
 
 func main() {
 	c := NewCargo()
+
+	// Ensure random is seeded, does not need to be secure.
+	rand.Seed(time.Now().UTC().UnixNano())
 
 	c.SetupWebserver()
 }
